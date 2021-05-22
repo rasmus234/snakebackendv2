@@ -1,0 +1,11 @@
+GET http://localhost:3000/scores
+
+###
+
+POST http://localhost:3000/scores
+Content-Type: application/json
+
+{
+"username": "rasmustest",
+"score": 2
+}
