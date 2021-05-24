@@ -1,4 +1,4 @@
-GET http://localhost:3000/scores
+GET https://snakewebv2.herokuapp.com/scores
 
 ###
 

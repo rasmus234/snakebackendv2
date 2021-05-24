@@ -15,4 +15,4 @@ db.once("open", () => console.log("connected to database"))
 const usersRouter = require("./routes/scores")
 app.use("/scores",usersRouter)
 
-app.listen(3000,() => console.log("server started"))
+app.listen(process.env.PORT,() => console.log("server started"))
