@@ -10,7 +10,7 @@ const db = mongoose.connection
 db.on("error", (error) => console.error(error))
 db.once("open", () => console.log("connected to database"))
 
-
+//
 const usersRouter = require("./routes/scores")
 app.use("/scores", usersRouter)
 
