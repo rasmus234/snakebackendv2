@@ -1,10 +1,10 @@
 {
   "name": "snakebackend",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "game/gameLogic.ts",
   "scripts": {
-    "start": "node main.js",
-    "nodemon": "nodemon main.js",
+    "start": "node game/gameLogic.ts",
+    "nodemon": "nodemon game/gameLogic.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,7 +17,10 @@
     "express": "^4.17.1",
     "mongodb": "^3.6.7",
     "mongoose": "^5.12.10",
-    "requirejs": "^2.3.6"
+    "requirejs": "^2.3.6",
+    "socket.io": "^4.1.2",
+    "socket.io-client": "^4.1.2",
+    "typescript": "^4.3.5"
   },
   "engines": {
     "node": "14.16.1"

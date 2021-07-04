@@ -2,6 +2,8 @@ const mongoose = require("mongoose")
 const express = require("express")
 const app = express()
 const cors = require("cors")
+const http = require('http');
+
 
 app.options('*', cors())
 app.use(cors())
@@ -11,9 +13,20 @@ const db = mongoose.connection
 db.on("error", (error) => console.error(error))
 db.once("open", () => console.log("connected to database"))
 
-
-//
 const usersRouter = require("./routes/scores")
 app.use("/scores", usersRouter)
 
-app.listen(process.env.PORT || 5000, () => console.log("server started"))
+const server = http.createServer(app);
+const io = require("socket.io")(server,{cors: {
+        origin: "*"
+    }
+})
+
+
+io.on("connection", socket => {
+    console.log("hi " + socket.id)
+})
+io.on("hi", () => console.log("hi"))
+
+server.listen(process.env.PORT || 5000, () => console.log("server started"))
+
