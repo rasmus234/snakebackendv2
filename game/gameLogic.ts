@@ -33,16 +33,15 @@ export const io: Socket = require("socket.io")(server,{cors: {
 io.on("connection", (socket: Socket) => {
     console.log("hi " + socket.id)
     io.emit("hiFromServer")
-    socket.on("hi",args => console.log(args))
+    socket.on("playerDead", snakelength => {
+        console.log("player died :(")
+        console.log(snakelength);
+    })
+
 
 })
 io.on("hi", () => {
     console.log("hi")
-})
-
-io.on("playerDead", socket => {
-    console.log("player died :(")
-    console.log(JSON.parse(socket.data));
 })
 
 io.on("move", socket => console.log("moving"))
