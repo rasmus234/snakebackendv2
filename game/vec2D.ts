@@ -1,4 +1,5 @@
-import {canvasDimension, entityLocations, snakes, tileHeight, tileWidth} from "./gameLogic"
+import {canvasDimension, tileHeight, tileWidth} from "./gameLogic"
+import GameState from "./gameState"
 
 export class Vec2D {
     x: number
@@ -13,6 +14,7 @@ export class Vec2D {
             this.height = height
             this.width = width
         }
+
     }
 
 
@@ -21,16 +23,17 @@ export class Vec2D {
         return false
     }
 
-    setRandomLocation?() {
+    setRandomLocation?(gamestate?: GameState) {
         let x: number
         let y: number
         let newLocation: Vec2D
+
         do {
             x = Math.floor(Math.random() * (canvasDimension.x / tileWidth))
             y = Math.floor(Math.random() * (canvasDimension.y / tileHeight))
             newLocation = new Vec2D(x, y)
-        } while (entityLocations.some(value => value.isOn(newLocation) ||
-            snakes.flatMap(value1 => value1.snakeParts).some(value1 => value1.isOn(newLocation))
+        } while (gamestate && gamestate.entityLocations.some(value => value.isOn(newLocation) ||
+            gamestate.snakes.flatMap(value1 => value1.snakeParts).some(value1 => value1.isOn(newLocation))
         ))
 
         this.x = x

@@ -1,26 +1,26 @@
 import {Vec2D} from "./vec2D"
-import {Drawable} from "./Drawable"
-import {canvasDimension, tileWidth, tileHeight, snakes} from "./gameLogic"
-import {Snake} from "./snake"
+import {tileWidth, tileHeight} from "./gameLogic"
 import {Entity} from "./entity"
-import {Warp} from "./powerup"
+import GameState from "./gameState"
 
 export class Food implements Entity {
     location: Vec2D
     color = "#fdc601"
 
-    constructor() {
-        this.location = new Vec2D(0,0)
-        this.location.setRandomLocation()
+    constructor(gameState: GameState) {
+        this.location = new Vec2D(0, 0)
+        this.location.setRandomLocation(gameState)
 
     }
 
-    static foodArray(amount: number): Food[] {
-        let foodArray: Food[] = []
+    static foodArray(amount: number, gameState: GameState): void {
+        let foodArray: Food[] = gameState.foods
         for (let i = 0; i < amount; i++) {
-            foodArray.push(new Food())
+            let food = new Food(gameState)
+            foodArray.push(food)
+            gameState.entityLocations.push(food.location)
+
         }
-        return foodArray
     }
 
     draw(gameboard: CanvasRenderingContext2D) {
@@ -31,19 +31,18 @@ export class Food implements Entity {
         gameboard.strokeRect(this.location.x * tileWidth, this.location.y * tileHeight, tileWidth, tileHeight)
     }
 
-    update() {
+    update(gameState: GameState) {
 
-        snakes.forEach(snake => {
+        gameState.snakes.forEach(snake => {
             let snakeHead = snake.snakeParts[0]
             let snakeOnFood = snakeHead.isOn(this.location)
             if (snakeOnFood) {
-                snake.eatFood()
+                snake.eatFood(gameState)
                 this.location.setRandomLocation()
             }
         })
 
     }
-
 
 
 }

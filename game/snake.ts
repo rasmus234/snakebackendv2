@@ -1,27 +1,24 @@
 import "./Drawable"
-import {canvasDimension, currentFrame, snakes, tileHeight, tileWidth, username} from "./gameLogic"
+import {canvasDimension, currentFrame, io, tileHeight, tileWidth} from "./gameLogic"
 import {Vec2D} from "./vec2D"
-import {getDirection} from "./input"
-import {Drawable} from "./Drawable"
-import {player} from "./player"
 import {Entity} from "./entity"
 import {EatOthers, Powerup, Warp} from "./powerup"
-import {io} from "./gameLogic";
+import GameState from "./gameState"
 
 
 export class Snake implements Entity {
 
-    playerNumber: player
+    player
     speed = 10
     color = "cyan"
     snakeParts: Vec2D[]
     activePowerups: Powerup[] = []
+    direction: Vec2D = {x: 0,y: 1}
+    lastDirection: Vec2D
+    socketId
 
-    constructor(playerNumber: player, ...bodyParts: Vec2D[]) {
-        this.playerNumber = playerNumber
-        if (playerNumber == player.PLAYER2) this.color = "red"
+    constructor( ...bodyParts: Vec2D[]) {
         this.snakeParts = bodyParts
-
     }
 
     draw(gameboard: CanvasRenderingContext2D): void {
@@ -34,28 +31,29 @@ export class Snake implements Entity {
     }
 
 
-    update(): void {
-        this.move()
+    update(gameState: GameState): void {
+        this.move(gameState)
     }
 
-    private move() {
+    private move(gameState: GameState) {
         let currentHead: Vec2D = this.snakeParts[0]
-        let newHead: Vec2D = new Vec2D(currentHead.x + getDirection(this.playerNumber).x, currentHead.y + getDirection(this.playerNumber).y)
+        let newHead: Vec2D = new Vec2D(currentHead.x + this.getDirection().x, currentHead.y + this.getDirection().y)
         let hasWarpPowerup = this.activePowerups.some(powerup => powerup instanceof Warp)
-        let hasCollided = this.checkCollisions(newHead, hasWarpPowerup)
+        let hasCollided = this.checkCollisions(newHead, hasWarpPowerup, gameState)
         if (hasWarpPowerup) this.warp(newHead)
 
         if (hasCollided) {
-            this.kill()
+            this.kill(gameState)
+            console.log("killed snake")
 
         }
         this.snakeParts.pop()
         this.snakeParts.unshift(newHead)
     }
 
-    private kill() {
-        window.cancelAnimationFrame(currentFrame)
-        console.log(this)
+    private kill(gameState: GameState) {
+        gameState.stopGame(this.player)
+        console.log(this.snakeParts)
     }
 
     private warp(newHead: Vec2D) {
@@ -67,8 +65,8 @@ export class Snake implements Entity {
         }
     }
 
-    private checkCollisions(newHead: Vec2D, hasWarpPowerup: boolean = false): boolean {
-        const otherSnakes: Snake[] = this.getOtherSnakes()
+    private checkCollisions(newHead: Vec2D, hasWarpPowerup: boolean = false, gameState: GameState): boolean {
+        const otherSnakes: Snake[] = this.getOtherSnakes(gameState)
         const overlapOtherSnakes = this.checkOverlapOtherSnakes(otherSnakes, newHead)
         let overlapOfSelf = this.checkOverlap(newHead)
         let outBounds = hasWarpPowerup ? false : this.checkBounds(newHead)
@@ -99,31 +97,74 @@ export class Snake implements Entity {
         this.snakeParts.push(tail)
     }
 
-    private removeSegmentOthers() {
-        const otherSnakes: Snake[] = this.getOtherSnakes()
+    private removeSegmentOthers(gameState: GameState) {
+        const otherSnakes: Snake[] = this.getOtherSnakes(gameState)
         otherSnakes.forEach(snake => {
             snake.removeSegment()
             if (snake.snakeParts.length == 0) {
-                snake.kill()
+                snake.kill(gameState)
             }
         })
     }
 
-    private getOtherSnakes() {
-        return snakes.filter(snake => snake.playerNumber != this.playerNumber)
+    private getOtherSnakes(gameState: GameState) {
+        return gameState.snakes.filter(snake => snake.player != this.player)
     }
 
     public removeSegment() {
         this.snakeParts.pop()
     }
 
-    public eatFood() {
+    public eatFood(gameState: GameState) {
 
         this.addSegment()
-        this.speed = Math.min(this.speed +1.5, 20)
+        this.speed = Math.min(this.speed + 1.5, 20)
         if (this.activePowerups.some(powerup => powerup instanceof EatOthers)) {
-            this.removeSegmentOthers()
+            this.removeSegmentOthers(gameState)
         }
     }
-}
 
+    public setDirection(ev: string) {
+        switch (ev) {
+            case "ArrowUp":
+                if (this.lastDirection.y === 1) break
+                this.direction = {x: 0, y: -1}
+                break
+            case "ArrowDown":
+                if (this.lastDirection.y === -1) break
+                this.direction = {x: 0, y: +1}
+                break
+            case "ArrowRight":
+                if (this.lastDirection.x === -1) break
+                this.direction = {x: 1, y: 0}
+                break
+            case "ArrowLeft":
+                if (this.lastDirection.x === 1) break
+                this.direction = {x: -1, y: 0}
+                break
+
+            case "w":
+                if (this.lastDirection.y === 1) break
+                this.direction = {x: 0, y: -1}
+                break
+            case "s":
+                if (this.lastDirection.y === -1) break
+                this.direction = {x: 0, y: +1}
+                break
+            case "d":
+                if (this.lastDirection.x === -1) break
+                this.direction = {x: 1, y: 0}
+                break
+            case "a":
+                if (this.lastDirection.x === 1) break
+                this.direction = {x: -1, y: 0}
+                break
+        }
+        console.log(this.direction)
+    }
+
+    public getDirection(): Vec2D {
+        this.lastDirection = this.direction
+        return this.direction
+    }
+}

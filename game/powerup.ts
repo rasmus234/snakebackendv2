@@ -1,8 +1,8 @@
 import {Entity} from "./entity"
 import {Vec2D} from "./vec2D"
-import {snakes, tileHeight, tileWidth} from "./gameLogic"
-import {player} from "./player"
+import {tileHeight, tileWidth} from "./gameLogic"
 import {Snake} from "./snake"
+import GameState from "./gameState"
 
 export class Powerup implements Entity {
     color: string
@@ -11,9 +11,9 @@ export class Powerup implements Entity {
     location: Vec2D
     currentOwner: Snake
 
-    constructor() {
+    constructor(gameState: GameState) {
         this.location = new Vec2D(0, 0)
-        this.location.setRandomLocation()
+        this.location.setRandomLocation(gameState)
         this.timeLeft = this.time
     }
 
@@ -29,10 +29,10 @@ export class Powerup implements Entity {
     }
 
 
-    update() {
+    update(gameState: GameState) {
         // console.log(this.timeLeft)
         this.timeLeft -= 100
-        this.checkColissions()
+        this.checkColissions(gameState)
         if (this.timeLeft < 1) {
             if (this.currentOwner !== undefined) {
                 console.log(this.currentOwner)
@@ -45,8 +45,8 @@ export class Powerup implements Entity {
         }
     }
 
-    checkColissions() {
-        snakes.forEach(snake => {
+    checkColissions(gameState: GameState) {
+        gameState.snakes.forEach(snake => {
             let snakeHead = snake.snakeParts[0]
             let snakeOnPowerup = snakeHead.isOn(this.location)
             if (snakeOnPowerup) {
@@ -64,8 +64,8 @@ export class EatOthers extends Powerup {
     color: string = "green"
     time: number = 10000
 
-    constructor() {
-        super()
+    constructor(gamestate) {
+        super(gamestate)
         this.timeLeft = this.time
     }
 }
@@ -74,16 +74,16 @@ export class Warp extends Powerup {
     color = "pink"
     time = 10000
 
-    constructor() {
-        super()
+    constructor(gamestate) {
+        super(gamestate)
         this.timeLeft = this.time
     }
 }
 export class Teleport extends Powerup{
     color = "black"
     time = 10000
-    constructor() {
-        super()
+    constructor(gamestate) {
+        super(gamestate)
         this.timeLeft = this.time
     }
 
