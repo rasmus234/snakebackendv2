@@ -6,7 +6,7 @@ const cors = require("cors")
 app.options('*', cors())
 app.use(cors())
 app.use(express.json())
-mongoose.connect("mongodb+srv://snakeMaster:snake@snakecluster.cbj1k.mongodb.net/snakeMaster?retryWrites=true&w=majority", {useNewUrlParser: true})
+mongoose.connect(process.env.CONNECTION_STRING, {useNewUrlParser: true})
 const db = mongoose.connection
 db.on("error", (error) => console.error(error))
 db.once("open", () => console.log("connected to database"))
